@@ -7,18 +7,18 @@ const modalRoot = document.querySelector('#modal-root');
 
 export const Modal = ({ closeModal, largeImageURL, tags }) => {
   useEffect(() => {
+    const handleEscClose = e => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    };
+
     document.addEventListener('keydown', handleEscClose);
 
     return () => {
       document.removeEventListener('keydown', handleEscClose);
     };
-  });
-
-  const handleEscClose = e => {
-    if (e.key === 'Escape') {
-      closeModal();
-    }
-  };
+  }, [closeModal]);
 
   const handleBackdropClickClose = e => {
     if (e.target === e.currentTarget) {

@@ -20,6 +20,8 @@ export const App = () => {
   const [pages, setPages] = useState(0);
 
   useEffect(() => {
+    if (!query) return;
+
     async function fetchData() {
       try {
         setIsLoading(true);
