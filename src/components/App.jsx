@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -11,21 +11,18 @@ import css from './App.module.css';
 
 const perPage = 12;
 
-class App extends Component {
-  state = {
-    images: [],
-    isLoading: false,
-    error: null,
-    query: '',
-    page: 1,
-    pages: 0,
-  };
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(0);
 
-  async componentDidUpdate(prevProps, prevState) {
-    const { query, page } = this.state;
-    if (prevState.query !== query || prevState.page !== page) {
+  useEffect(() => {
+    async function fetchData() {
       try {
-        this.setState({ isLoading: true });
+        setIsLoading(true);
         const { hits, totalHits } = await fetchImageByName(
           query,
           page,
@@ -40,48 +37,39 @@ class App extends Component {
         }
 
         if (page === 1) {
-          this.setState({ pages: Math.ceil(totalHits / perPage) });
+          setPages(Math.ceil(totalHits / perPage));
         }
 
-        this.setState(prevState => ({
-          images: [...prevState.images, ...hits],
-        }));
+        setImages(prevState => [...prevState, ...hits]);
       } catch (error) {
-        this.setState({ error });
+        setError(error);
       } finally {
-        this.setState({
-          isLoading: false,
-        });
+        setIsLoading(false);
       }
     }
-  }
+    fetchData();
+  }, [query, page]);
 
-  onSubmit = search => {
-    this.setState({ query: search, page: 1, images: [] });
+  const onSubmit = search => {
+    setQuery(search);
+    setPage(1);
+    setImages([]);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
+  const handleLoadMore = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  render() {
-    const { images, isLoading, error, page, pages } = this.state;
-    const { onSubmit, handleLoadMore } = this;
-    return (
-      <div className={css.App}>
-        <Searchbar onSubmit={onSubmit} />
-        {error && <p>Whoops, something went wrong: {error.message}</p>}
-        {isLoading && <Loader />}
-        {images.length > 0 && <ImageGallery images={images} />}
-        {!isLoading && !error && images.length > 0 && page < pages && (
-          <Button onClick={handleLoadMore} />
-        )}
-        <ToastContainer />
-      </div>
-    );
-  }
-}
-
-export { App };
+  return (
+    <div className={css.App}>
+      <Searchbar onSubmit={onSubmit} />
+      {error && <p>Whoops, something went wrong: {error.message}</p>}
+      {isLoading && <Loader />}
+      {images.length > 0 && <ImageGallery images={images} />}
+      {!isLoading && !error && images.length > 0 && page < pages && (
+        <Button onClick={handleLoadMore} />
+      )}
+      <ToastContainer />
+    </div>
+  );
+};
