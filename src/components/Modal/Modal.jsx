@@ -12,7 +12,7 @@ export const Modal = ({ closeModal, largeImageURL, tags }) => {
     return () => {
       document.removeEventListener('keydown', handleEscClose);
     };
-  }, []);
+  });
 
   const handleEscClose = e => {
     if (e.key === 'Escape') {
